@@ -13,6 +13,7 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           # Linux x86_64
@@ -21,9 +22,6 @@ jobs:
           # Linux aarch64
           - os: ubuntu-latest
             target: aarch64
-          # macOS x86_64
-          - os: macos-13
-            target: x86_64
           # macOS Apple Silicon
           - os: macos-latest
             target: aarch64
@@ -39,7 +37,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist --interpreter 3.11 3.12 3.13
           manylinux: auto
       - uses: actions/upload-artifact@v4
         with:
