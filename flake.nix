@@ -38,7 +38,7 @@
           ];
 
           shellHook = ''
-            echo "🔧 ironpipe dev shell"
+            echo "🔧 medforge dev shell"
             echo "  rust: $(rustc --version)"
             echo "  python: $(python3 --version)"
             echo "  maturin: $(maturin --version)"
