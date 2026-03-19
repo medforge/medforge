@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/ironpipe
+      url: https://pypi.org/p/medforge
     permissions:
       id-token: write  # trusted publishing
     steps:

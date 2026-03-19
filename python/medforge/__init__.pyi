@@ -1,4 +1,4 @@
-"""Type stubs for ironpipe — High-performance HL7v2 message parser."""
+"""Type stubs for medforge — High-performance HL7v2 message parser."""
 
 from __future__ import annotations
 

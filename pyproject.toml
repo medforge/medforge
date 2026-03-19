@@ -3,7 +3,7 @@ requires = ["maturin>=1.0,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "ironpipe"
+name = "medforge"
 version = "0.1.0"
 description = "High-performance HL7v2 message parser powered by Rust"
 readme = "README.md"
@@ -24,8 +24,8 @@ classifiers = [
 ]
 
 [project.urls]
-Repository = "https://github.com/ironpipe/ironpipe"
-Issues = "https://github.com/ironpipe/ironpipe/issues"
+Repository = "https://github.com/medforge/medforge"
+Issues = "https://github.com/medforge/medforge/issues"
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-benchmark"]
@@ -33,7 +33,7 @@ dev = ["pytest", "pytest-benchmark"]
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "python"
-module-name = "ironpipe._core"
+module-name = "medforge._core"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

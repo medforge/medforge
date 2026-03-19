@@ -1,4 +1,4 @@
-"""Benchmarks for ironpipe HL7v2 parser.
+"""Benchmarks for medforge HL7v2 parser.
 
 Run with:
     python -m pytest benches/bench_parser.py -v --benchmark-group-by=func
@@ -6,7 +6,7 @@ Run with:
 Requires: pip install pytest-benchmark
 """
 
-import ironpipe
+import medforge
 
 # -- Sample messages of varying sizes ----------------------------------------
 
@@ -49,45 +49,45 @@ LARGE_10K = _build_large_message(10_000)
 
 def test_bench_parse_simple_adt(benchmark):
     """Parse a typical 6-segment ADT message."""
-    benchmark(ironpipe.parse, SIMPLE_ADT)
+    benchmark(medforge.parse, SIMPLE_ADT)
 
 
 def test_bench_parse_medium_oru(benchmark):
     """Parse a 25-segment ORU message."""
-    benchmark(ironpipe.parse, MEDIUM_ORU)
+    benchmark(medforge.parse, MEDIUM_ORU)
 
 
 def test_bench_parse_large_1k(benchmark):
     """Parse a message with 1,000 OBX segments."""
-    benchmark(ironpipe.parse, LARGE_1K)
+    benchmark(medforge.parse, LARGE_1K)
 
 
 def test_bench_parse_large_10k(benchmark):
     """Parse a message with 10,000 OBX segments."""
-    benchmark(ironpipe.parse, LARGE_10K)
+    benchmark(medforge.parse, LARGE_10K)
 
 
 def test_bench_terser_access(benchmark):
     """Terser path access on a parsed message."""
-    msg = ironpipe.parse(SIMPLE_ADT)
+    msg = medforge.parse(SIMPLE_ADT)
     benchmark(msg.get, "PID-5-1")
 
 
 def test_bench_to_json(benchmark):
     """Serialize a parsed ADT message to JSON."""
-    msg = ironpipe.parse(SIMPLE_ADT)
+    msg = medforge.parse(SIMPLE_ADT)
     benchmark(msg.to_json)
 
 
 def test_bench_to_dict(benchmark):
     """Serialize a parsed ADT message to dict."""
-    msg = ironpipe.parse(SIMPLE_ADT)
+    msg = medforge.parse(SIMPLE_ADT)
     benchmark(msg.to_dict)
 
 
 def test_bench_segment_lookup(benchmark):
     """Look up a segment by name on a large message."""
-    msg = ironpipe.parse(LARGE_1K)
+    msg = medforge.parse(LARGE_1K)
     benchmark(msg.segment, "PID")
 
 

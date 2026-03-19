@@ -15,9 +15,9 @@ use types::{Component, Field, Message, Segment};
 /// # Example (Python)
 ///
 /// ```python
-/// import ironpipe
+/// import medforge
 ///
-/// msg = ironpipe.parse("MSH|^~\\&|SENDER|FAC|RECV|FAC|20230101||ADT^A01|123|P|2.5\\rPID|1||MRN||DOE^JOHN")
+/// msg = medforge.parse("MSH|^~\\&|SENDER|FAC|RECV|FAC|20230101||ADT^A01|123|P|2.5\\rPID|1||MRN||DOE^JOHN")
 /// print(msg.segment("PID").field(5).component(1))  # "DOE"
 /// ```
 #[pyfunction]
@@ -25,7 +25,7 @@ fn parse(raw: &str) -> PyResult<Message> {
     parser::parse_message(raw).map_err(pyo3::exceptions::PyValueError::new_err)
 }
 
-/// ironpipe — High-performance HL7v2 message parser.
+/// medforge — High-performance HL7v2 message parser.
 #[pymodule]
 fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(parse, m)?)?;

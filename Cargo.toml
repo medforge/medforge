@@ -1,12 +1,12 @@
 [package]
-name = "ironpipe"
+name = "medforge"
 version = "0.1.0"
 edition = "2024"
 description = "High-performance HL7v2 message parser with Python bindings"
 license = "MIT"
 
 [lib]
-name = "ironpipe"
+name = "medforge"
 crate-type = ["cdylib"]
 
 [dependencies]

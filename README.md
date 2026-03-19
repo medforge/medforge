@@ -1,4 +1,4 @@
-# ironpipe 🔧
+# medforge 🔧
 
 High-performance HL7v2 message parser for Python, powered by Rust.
 
@@ -14,14 +14,14 @@ High-performance HL7v2 message parser for Python, powered by Rust.
 ## Installation
 
 ```bash
-pip install ironpipe
+pip install medforge
 ```
 
 ### From source (requires Rust)
 
 ```bash
-git clone https://github.com/your-org/ironpipe.git
-cd ironpipe
+git clone https://github.com/your-org/medforge.git
+cd medforge
 nix develop   # or install Rust + maturin manually
 maturin develop
 ```
@@ -29,9 +29,9 @@ maturin develop
 ## Quick Start
 
 ```python
-import ironpipe
+import medforge
 
-msg = ironpipe.parse(
+msg = medforge.parse(
     "MSH|^~\\&|EPIC|HOSPITAL|RECV|FAC|20260318||ADT^A01^ADT_A01|MSG001|P|2.5.1\r"
     "PID|1||MRN12345^^^MRN||DOE^JANE^M^^DR||19850315|F\r"
     "PV1|1|I|4EAST^401^1^^^N||||1234^SMITH^ROBERT^J^^^MD\r"
