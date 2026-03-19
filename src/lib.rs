@@ -22,8 +22,7 @@ use types::{Component, Field, Message, Segment};
 /// ```
 #[pyfunction]
 fn parse(raw: &str) -> PyResult<Message> {
-    parser::parse_message(raw)
-        .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
+    parser::parse_message(raw).map_err(pyo3::exceptions::PyValueError::new_err)
 }
 
 /// ironpipe — High-performance HL7v2 message parser.

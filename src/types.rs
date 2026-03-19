@@ -237,7 +237,7 @@ impl Message {
     fn message_type(&self) -> PyResult<(String, String)> {
         let msh = self.segment("MSH")?;
         let msg_type_field = msh.field(9)?;
-        let event_type = if msg_type_field.components.len() >= 1 {
+        let event_type = if !msg_type_field.components.is_empty() {
             msg_type_field.components[0].value.clone()
         } else {
             String::new()
@@ -333,9 +333,7 @@ impl Message {
     fn terser_get(&self, path: &str) -> PyResult<String> {
         let parts: Vec<&str> = path.split('-').collect();
         if parts.is_empty() {
-            return Err(pyo3::exceptions::PyValueError::new_err(
-                "Empty terser path",
-            ));
+            return Err(pyo3::exceptions::PyValueError::new_err("Empty terser path"));
         }
 
         // Parse segment name and optional repetition index
@@ -370,10 +368,7 @@ impl Message {
         }
 
         let field_idx: usize = parts[1].parse().map_err(|_| {
-            pyo3::exceptions::PyValueError::new_err(format!(
-                "Invalid field index: '{}'",
-                parts[1]
-            ))
+            pyo3::exceptions::PyValueError::new_err(format!("Invalid field index: '{}'", parts[1]))
         })?;
         let field = seg.field(field_idx)?;
 
@@ -405,12 +400,12 @@ impl Message {
 
 /// Parse a segment reference like "PID" or "OBX(1)" into (name, repetition_index).
 fn parse_segment_ref(s: &str) -> (&str, usize) {
-    if let Some(paren_start) = s.find('(') {
-        if let Some(paren_end) = s.find(')') {
-            let name = &s[..paren_start];
-            let idx: usize = s[paren_start + 1..paren_end].parse().unwrap_or(0);
-            return (name, idx);
-        }
+    if let Some(paren_start) = s.find('(')
+        && let Some(paren_end) = s.find(')')
+    {
+        let name = &s[..paren_start];
+        let idx: usize = s[paren_start + 1..paren_end].parse().unwrap_or(0);
+        return (name, idx);
     }
     (s, 0)
 }

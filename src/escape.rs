@@ -41,8 +41,7 @@ pub fn decode_escapes(value: &str, enc: &EncodingChars) -> String {
                         let mut j = 0;
                         let hex_chars: Vec<char> = hex_str.chars().collect();
                         while j + 1 < hex_chars.len() {
-                            let byte_str: String =
-                                hex_chars[j..j + 2].iter().collect();
+                            let byte_str: String = hex_chars[j..j + 2].iter().collect();
                             if let Ok(byte) = u8::from_str_radix(&byte_str, 16) {
                                 result.push(byte as char);
                             }
@@ -86,7 +85,10 @@ mod tests {
 
     #[test]
     fn test_field_sep_escape() {
-        assert_eq!(decode_escapes("before\\F\\after", &default_enc()), "before|after");
+        assert_eq!(
+            decode_escapes("before\\F\\after", &default_enc()),
+            "before|after"
+        );
     }
 
     #[test]
@@ -111,15 +113,15 @@ mod tests {
 
     #[test]
     fn test_line_break_escape() {
-        assert_eq!(decode_escapes("line1\\.br\\line2", &default_enc()), "line1\nline2");
+        assert_eq!(
+            decode_escapes("line1\\.br\\line2", &default_enc()),
+            "line1\nline2"
+        );
     }
 
     #[test]
     fn test_multiple_escapes() {
-        assert_eq!(
-            decode_escapes("a\\F\\b\\S\\c", &default_enc()),
-            "a|b^c"
-        );
+        assert_eq!(decode_escapes("a\\F\\b\\S\\c", &default_enc()), "a|b^c");
     }
 
     #[test]

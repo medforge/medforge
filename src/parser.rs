@@ -74,9 +74,7 @@ fn extract_encoding_chars(msh: &str) -> Result<EncodingChars, String> {
 
 /// Split raw message into segment strings, handling \r, \n, and \r\n.
 fn split_segments(raw: &str) -> Vec<&str> {
-    raw.split(|c| c == '\r' || c == '\n')
-        .filter(|s| !s.is_empty())
-        .collect()
+    raw.split(['\r', '\n']).filter(|s| !s.is_empty()).collect()
 }
 
 /// Parse a single segment string into a [`Segment`].
@@ -161,10 +159,7 @@ fn parse_field(raw: &str, enc: &EncodingChars) -> Field {
 fn parse_single_field(raw: &str, enc: &EncodingChars) -> Field {
     let comp_parts: Vec<&str> = raw.split(enc.component_sep).collect();
 
-    let components: Vec<Component> = comp_parts
-        .iter()
-        .map(|c| parse_component(c, enc))
-        .collect();
+    let components: Vec<Component> = comp_parts.iter().map(|c| parse_component(c, enc)).collect();
 
     Field {
         value: decode_escapes(raw, enc),
@@ -194,8 +189,7 @@ fn parse_component(raw: &str, enc: &EncodingChars) -> Component {
 mod tests {
     use super::*;
 
-    const SAMPLE_ADT: &str =
-        "MSH|^~\\&|SENDER|FAC|RECV|FAC|20230101120000||ADT^A01|12345|P|2.5\rPID|1||MRN123^^^MRN||DOE^JOHN^M||19800101|M\rPV1|1|I|4EAST^401^1";
+    const SAMPLE_ADT: &str = "MSH|^~\\&|SENDER|FAC|RECV|FAC|20230101120000||ADT^A01|12345|P|2.5\rPID|1||MRN123^^^MRN||DOE^JOHN^M||19800101|M\rPV1|1|I|4EAST^401^1";
 
     #[test]
     fn test_parse_basic_message() {
@@ -256,14 +250,16 @@ mod tests {
 
     #[test]
     fn test_newline_delimiter() {
-        let raw = "MSH|^~\\&|SENDER|FAC|RECV|FAC|20230101||ADT^A01|123|P|2.5\nPID|1||MRN|||DOE^JOHN";
+        let raw =
+            "MSH|^~\\&|SENDER|FAC|RECV|FAC|20230101||ADT^A01|123|P|2.5\nPID|1||MRN|||DOE^JOHN";
         let msg = parse_message(raw).unwrap();
         assert_eq!(msg.segments.len(), 2);
     }
 
     #[test]
     fn test_crlf_delimiter() {
-        let raw = "MSH|^~\\&|SENDER|FAC|RECV|FAC|20230101||ADT^A01|123|P|2.5\r\nPID|1||MRN|||DOE^JOHN";
+        let raw =
+            "MSH|^~\\&|SENDER|FAC|RECV|FAC|20230101||ADT^A01|123|P|2.5\r\nPID|1||MRN|||DOE^JOHN";
         let msg = parse_message(raw).unwrap();
         assert_eq!(msg.segments.len(), 2);
     }
@@ -279,8 +275,7 @@ mod tests {
 
     #[test]
     fn test_repetition() {
-        let raw =
-            "MSH|^~\\&|S|F|R|F|20230101||ADT^A01|1|P|2.5\rPID|1||MRN1^^^MRN~DEA1^^^DEA";
+        let raw = "MSH|^~\\&|S|F|R|F|20230101||ADT^A01|1|P|2.5\rPID|1||MRN1^^^MRN~DEA1^^^DEA";
         let msg = parse_message(raw).unwrap();
         let pid = &msg.segments[1];
         let id_field = &pid.fields[2]; // PID-3
@@ -303,9 +298,7 @@ mod tests {
 
     #[test]
     fn test_mllp_framed_message() {
-        let raw = format!(
-            "\x0bMSH|^~\\&|S|F|R|F|20230101||ADT^A01|1|P|2.5\rPID|1||MRN\x1c\r"
-        );
+        let raw = format!("\x0bMSH|^~\\&|S|F|R|F|20230101||ADT^A01|1|P|2.5\rPID|1||MRN\x1c\r");
         let msg = parse_message(&raw).unwrap();
         assert_eq!(msg.segments.len(), 2);
     }
@@ -339,7 +332,9 @@ mod tests {
             raw.push('\r');
             raw.push_str(&format!(
                 "OBX|{}|NM|CODE-{}||{}|unit|0-100||||F",
-                i, i, i * 7
+                i,
+                i,
+                i * 7
             ));
         }
 

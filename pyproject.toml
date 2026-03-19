@@ -9,6 +9,7 @@ description = "High-performance HL7v2 message parser powered by Rust"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
+keywords = ["hl7", "hl7v2", "parser", "healthcare", "medical", "rust"]
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
@@ -17,7 +18,17 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Intended Audience :: Healthcare Industry",
     "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    "Typing :: Typed",
 ]
+
+[project.urls]
+Repository = "https://github.com/ironpipe/ironpipe"
+Issues = "https://github.com/ironpipe/ironpipe/issues"
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-benchmark"]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]

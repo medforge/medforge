@@ -1,10 +1,10 @@
-/// MLLP (Minimal Lower Layer Protocol) framing utilities.
-///
-/// HL7 messages transmitted over TCP are wrapped in MLLP framing:
-/// - Start: `\x0b` (vertical tab / VT)
-/// - End:   `\x1c\r` (file separator + carriage return)
-///
-/// This module detects and strips MLLP framing.
+//! MLLP (Minimal Lower Layer Protocol) framing utilities.
+//!
+//! HL7 messages transmitted over TCP are wrapped in MLLP framing:
+//! - Start: `\x0b` (vertical tab / VT)
+//! - End:   `\x1c\r` (file separator + carriage return)
+//!
+//! This module detects and strips MLLP framing.
 
 const MLLP_START: u8 = 0x0B; // VT (vertical tab)
 const MLLP_END: u8 = 0x1C; // FS (file separator)
