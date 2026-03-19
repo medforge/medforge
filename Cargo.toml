@@ -1,0 +1,15 @@
+[package]
+name = "ironpipe"
+version = "0.1.0"
+edition = "2024"
+description = "High-performance HL7v2 message parser with Python bindings"
+license = "MIT"
+
+[lib]
+name = "ironpipe"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.23", features = ["extension-module"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
