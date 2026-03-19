@@ -1,7 +1,6 @@
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde::Serialize;
-use std::collections::HashMap;
 
 /// HL7v2 encoding characters extracted from MSH segment.
 #[derive(Debug, Clone)]

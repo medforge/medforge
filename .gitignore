@@ -20,3 +20,4 @@ result
 .idea/
 .vscode/
 *.swp
+.venv-dev/
