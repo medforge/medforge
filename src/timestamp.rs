@@ -109,10 +109,9 @@ fn split_timezone(raw: &str) -> (&str, Option<i32>) {
         let possible_tz_start = len - 5;
         let tz_part = &raw[possible_tz_start..];
         if tz_part.starts_with('+') || tz_part.starts_with('-') {
-            if let (Ok(hours), Ok(mins)) = (
-                tz_part[1..3].parse::<i32>(),
-                tz_part[3..5].parse::<i32>(),
-            ) {
+            if let (Ok(hours), Ok(mins)) =
+                (tz_part[1..3].parse::<i32>(), tz_part[3..5].parse::<i32>())
+            {
                 let sign = if tz_part.starts_with('-') { -1 } else { 1 };
                 let offset_minutes = sign * (hours * 60 + mins);
                 return (&raw[..possible_tz_start], Some(offset_minutes));
@@ -134,9 +133,9 @@ fn parse_naive_datetime(s: &str) -> Result<NaiveDateTime, pyo3::PyErr> {
         )));
     }
 
-    let year: i32 = s[..4].parse().map_err(|_| {
-        pyo3::exceptions::PyValueError::new_err(format!("Invalid year in '{}'", s))
-    })?;
+    let year: i32 = s[..4]
+        .parse()
+        .map_err(|_| pyo3::exceptions::PyValueError::new_err(format!("Invalid year in '{}'", s)))?;
     let month: u32 = if len >= 6 {
         s[4..6].parse().unwrap_or(1)
     } else {
@@ -149,10 +148,7 @@ fn parse_naive_datetime(s: &str) -> Result<NaiveDateTime, pyo3::PyErr> {
     };
 
     let date = NaiveDate::from_ymd_opt(year, month, day).ok_or_else(|| {
-        pyo3::exceptions::PyValueError::new_err(format!(
-            "Invalid date: {}-{}-{}",
-            year, month, day
-        ))
+        pyo3::exceptions::PyValueError::new_err(format!("Invalid date: {}-{}-{}", year, month, day))
     })?;
 
     let hour: u32 = if len >= 10 {

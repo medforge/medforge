@@ -347,14 +347,23 @@ impl Message {
         let msh = self.segment("MSH")?;
 
         // Get original MSH fields
-        let field_sep = msh.field(1).map(|f| f.value.clone()).unwrap_or_else(|_| "|".to_string());
-        let enc_chars = msh.field(2).map(|f| f.value.clone()).unwrap_or_else(|_| "^~\\&".to_string());
+        let field_sep = msh
+            .field(1)
+            .map(|f| f.value.clone())
+            .unwrap_or_else(|_| "|".to_string());
+        let enc_chars = msh
+            .field(2)
+            .map(|f| f.value.clone())
+            .unwrap_or_else(|_| "^~\\&".to_string());
         let send_app = msh.field(3).map(|f| f.value.clone()).unwrap_or_default();
         let send_fac = msh.field(4).map(|f| f.value.clone()).unwrap_or_default();
         let recv_app = msh.field(5).map(|f| f.value.clone()).unwrap_or_default();
         let recv_fac = msh.field(6).map(|f| f.value.clone()).unwrap_or_default();
         let control_id = msh.field(10).map(|f| f.value.clone()).unwrap_or_default();
-        let version = msh.field(12).map(|f| f.value.clone()).unwrap_or_else(|_| "2.5".to_string());
+        let version = msh
+            .field(12)
+            .map(|f| f.value.clone())
+            .unwrap_or_else(|_| "2.5".to_string());
 
         // Get current timestamp
         let now = chrono::Local::now().format("%Y%m%d%H%M%S").to_string();
@@ -508,4 +517,3 @@ impl SegmentIterator {
         }
     }
 }
-

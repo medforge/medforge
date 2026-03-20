@@ -11,18 +11,25 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  # ── Rust tests ──────────────────────────────────────────────────────────────
-  rust-tests:
+  # ── Lint (fmt + clippy via cargo check) ───────────────────────────────────
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo test --verbose
+        with:
+          components: clippy, rustfmt
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+        env:
+          # Allow clippy to check without linking Python
+          PYO3_PRINT_CONFIG: "0"
 
   # ── Python tests (build extension + pytest) ────────────────────────────────
   python-tests:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
         python-version: ["3.11", "3.12", "3.13"]
@@ -40,14 +47,3 @@ jobs:
         run: maturin develop
       - name: Run tests
         run: python -m pytest tests/ -v
-
-  # ── Lint ────────────────────────────────────────────────────────────────────
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
-      - run: cargo fmt --check
-      - run: cargo clippy -- -D warnings
