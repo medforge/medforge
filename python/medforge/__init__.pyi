@@ -1,6 +1,8 @@
 """Type stubs for medforge — High-performance HL7v2 message parser."""
 
 from __future__ import annotations
+import datetime as dt
+from typing import Iterator
 
 class Component:
     """A single component within an HL7v2 field."""
@@ -48,6 +50,7 @@ class Segment:
     def __str__(self) -> str: ...
     def __len__(self) -> int: ...
     def __getitem__(self, index: int) -> Field: ...
+    def __iter__(self) -> Iterator[Field]: ...
 
 class Message:
     """A parsed HL7v2 message."""
@@ -87,16 +90,42 @@ class Message:
         ...
     def to_dict(self) -> dict: ...
     def to_json(self) -> str: ...
+    def ack(self, ack_code: str = "AA", text: str = "") -> str:
+        """Generate an ACK response message.
+
+        Args:
+            ack_code: "AA" (accept), "AE" (error), "AR" (reject).
+            text: Optional text message for MSA-3.
+
+        Returns:
+            A raw HL7v2 ACK message string.
+        """
+        ...
     def __getitem__(self, path: str) -> str:
         """Terser path access via bracket notation."""
         ...
     def __repr__(self) -> str: ...
     def __len__(self) -> int: ...
+    def __iter__(self) -> Iterator[Segment]: ...
 
 def parse(raw: str) -> Message:
-    """Parse a raw HL7v2 message string into a Message object.
+    """Parse a raw HL7v2 message string into a Message object."""
+    ...
 
-    Handles MLLP-framed input automatically. Supports \\r, \\n, and \\r\\n
-    segment delimiters.
+def parse_batch(raw: str) -> list[Message]:
+    """Parse a batch of HL7v2 messages from a raw string.
+
+    Handles FHS/BHS/BTS/FTS wrappers and multi-message streams.
     """
+    ...
+
+def parse_datetime(raw: str) -> dt.datetime:
+    """Parse an HL7v2 timestamp into a Python datetime.
+
+    Format: YYYY[MM[DD[HH[MM[SS[.S[S[S[S]]]]]]]]][+/-ZZZZ]
+    """
+    ...
+
+def parse_date(raw: str) -> dt.date:
+    """Parse an HL7v2 timestamp into a Python date."""
     ...

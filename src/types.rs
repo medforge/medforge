@@ -180,6 +180,13 @@ impl Segment {
         self.field(index)
     }
 
+    fn __iter__(&self) -> SegmentIterator {
+        SegmentIterator {
+            fields: self.fields.clone(),
+            index: 0,
+        }
+    }
+
     /// Serialize to a Python dict.
     fn to_dict(&self, py: Python<'_>) -> PyResult<PyObject> {
         let dict = PyDict::new(py);
@@ -323,6 +330,46 @@ impl Message {
     fn __len__(&self) -> usize {
         self.segments.len()
     }
+
+    fn __iter__(&self) -> MessageIterator {
+        MessageIterator {
+            segments: self.segments.clone(),
+            index: 0,
+        }
+    }
+
+    /// Generate an ACK response message.
+    ///
+    /// `ack_code`: "AA" (accept), "AE" (error), "AR" (reject). Default: "AA".
+    /// `text`: Optional text message for MSA-3.
+    #[pyo3(signature = (ack_code="AA", text=""))]
+    fn ack(&self, ack_code: &str, text: &str) -> PyResult<String> {
+        let msh = self.segment("MSH")?;
+
+        // Get original MSH fields
+        let field_sep = msh.field(1).map(|f| f.value.clone()).unwrap_or_else(|_| "|".to_string());
+        let enc_chars = msh.field(2).map(|f| f.value.clone()).unwrap_or_else(|_| "^~\\&".to_string());
+        let send_app = msh.field(3).map(|f| f.value.clone()).unwrap_or_default();
+        let send_fac = msh.field(4).map(|f| f.value.clone()).unwrap_or_default();
+        let recv_app = msh.field(5).map(|f| f.value.clone()).unwrap_or_default();
+        let recv_fac = msh.field(6).map(|f| f.value.clone()).unwrap_or_default();
+        let control_id = msh.field(10).map(|f| f.value.clone()).unwrap_or_default();
+        let version = msh.field(12).map(|f| f.value.clone()).unwrap_or_else(|_| "2.5".to_string());
+
+        // Get current timestamp
+        let now = chrono::Local::now().format("%Y%m%d%H%M%S").to_string();
+
+        // Generate a simple ACK control ID
+        let ack_control_id = format!("ACK{}", &control_id);
+
+        // Build ACK: swap sender/receiver
+        let sep = &field_sep;
+        let ack_msg = format!(
+            "MSH{sep}{enc_chars}{sep}{recv_app}{sep}{recv_fac}{sep}{send_app}{sep}{send_fac}{sep}{now}{sep}{sep}ACK{sep}{ack_control_id}{sep}P{sep}{version}\rMSA{sep}{ack_code}{sep}{control_id}{sep}{text}"
+        );
+
+        Ok(ack_msg)
+    }
 }
 
 impl Message {
@@ -409,3 +456,56 @@ fn parse_segment_ref(s: &str) -> (&str, usize) {
     }
     (s, 0)
 }
+
+// ---------------------------------------------------------------------------
+// Iterators
+// ---------------------------------------------------------------------------
+
+/// Iterator over segments in a message.
+#[pyclass]
+pub struct MessageIterator {
+    segments: Vec<Segment>,
+    index: usize,
+}
+
+#[pymethods]
+impl MessageIterator {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    fn __next__(&mut self) -> Option<Segment> {
+        if self.index < self.segments.len() {
+            let seg = self.segments[self.index].clone();
+            self.index += 1;
+            Some(seg)
+        } else {
+            None
+        }
+    }
+}
+
+/// Iterator over fields in a segment.
+#[pyclass]
+pub struct SegmentIterator {
+    fields: Vec<Field>,
+    index: usize,
+}
+
+#[pymethods]
+impl SegmentIterator {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    fn __next__(&mut self) -> Option<Field> {
+        if self.index < self.fields.len() {
+            let field = self.fields[self.index].clone();
+            self.index += 1;
+            Some(field)
+        } else {
+            None
+        }
+    }
+}
+

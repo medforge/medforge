@@ -365,3 +365,160 @@ class TestErrors:
             assert False, "Should have raised ValueError"
         except ValueError:
             pass
+
+
+# -- Iteration ----------------------------------------------------------------
+
+
+class TestIteration:
+    def test_message_iter(self):
+        msg = medforge.parse(SIMPLE_ADT)
+        names = [seg.name for seg in msg]
+        assert names == ["MSH", "PID", "PV1"]
+
+    def test_segment_iter(self):
+        msg = medforge.parse(SIMPLE_ADT)
+        pid = msg.segment("PID")
+        fields = list(pid)
+        assert len(fields) > 0
+        assert fields[0].value is not None
+
+    def test_message_iter_multi_dg1(self):
+        msg = medforge.parse(MULTI_DG1)
+        seg_names = [seg.name for seg in msg]
+        assert seg_names.count("DG1") == 2
+
+
+# -- Timestamp parsing --------------------------------------------------------
+
+
+class TestTimestamp:
+    def test_parse_datetime_full(self):
+        from datetime import datetime
+        dt = medforge.parse_datetime("20230315143022")
+        assert dt == datetime(2023, 3, 15, 14, 30, 22)
+
+    def test_parse_datetime_date_only(self):
+        from datetime import datetime
+        dt = medforge.parse_datetime("20230315")
+        assert dt == datetime(2023, 3, 15, 0, 0, 0)
+
+    def test_parse_datetime_with_fractional(self):
+        from datetime import datetime
+        dt = medforge.parse_datetime("20230315143022.123")
+        assert dt.year == 2023
+        assert dt.microsecond == 123000
+
+    def test_parse_datetime_with_timezone(self):
+        from datetime import datetime, timezone, timedelta
+        dt = medforge.parse_datetime("20230315143022-0500")
+        assert dt.tzinfo is not None
+        assert dt.utcoffset() == timedelta(hours=-5)
+        assert dt.hour == 14
+
+    def test_parse_datetime_positive_tz(self):
+        from datetime import timedelta
+        dt = medforge.parse_datetime("20230315143022+0530")
+        assert dt.utcoffset() == timedelta(hours=5, minutes=30)
+
+    def test_parse_date(self):
+        from datetime import date
+        d = medforge.parse_date("20230315")
+        assert d == date(2023, 3, 15)
+
+    def test_parse_date_from_full_timestamp(self):
+        from datetime import date
+        d = medforge.parse_date("20230315143022")
+        assert d == date(2023, 3, 15)
+
+    def test_parse_datetime_too_short(self):
+        try:
+            medforge.parse_datetime("202")
+            assert False, "Should have raised ValueError"
+        except ValueError:
+            pass
+
+
+# -- Batch mode ---------------------------------------------------------------
+
+
+class TestBatch:
+    def test_parse_batch_two_messages(self):
+        raw = (
+            "MSH|^~\\&|S|F|R|F|20230101||ADT^A01|1|P|2.5\r"
+            "PID|1||MRN1\r"
+            "MSH|^~\\&|S|F|R|F|20230102||ADT^A01|2|P|2.5\r"
+            "PID|1||MRN2"
+        )
+        msgs = medforge.parse_batch(raw)
+        assert len(msgs) == 2
+        assert msgs[0]["PID-3-1"] == "MRN1"
+        assert msgs[1]["PID-3-1"] == "MRN2"
+
+    def test_parse_batch_with_fhs(self):
+        raw = (
+            "FHS|^~\\&|BATCH\r"
+            "BHS|^~\\&|BATCH\r"
+            "MSH|^~\\&|S|F|R|F|20230101||ADT^A01|1|P|2.5\r"
+            "PID|1||MRN1\r"
+            "MSH|^~\\&|S|F|R|F|20230102||ADT^A01|2|P|2.5\r"
+            "PID|1||MRN2\r"
+            "BTS|2\r"
+            "FTS|1"
+        )
+        msgs = medforge.parse_batch(raw)
+        assert len(msgs) == 2
+
+    def test_parse_batch_single_message(self):
+        raw = (
+            "MSH|^~\\&|S|F|R|F|20230101||ADT^A01|1|P|2.5\r"
+            "PID|1||MRN"
+        )
+        msgs = medforge.parse_batch(raw)
+        assert len(msgs) == 1
+
+    def test_parse_batch_empty(self):
+        msgs = medforge.parse_batch("")
+        assert len(msgs) == 0
+
+
+# -- ACK generation -----------------------------------------------------------
+
+
+class TestACK:
+    def test_ack_default(self):
+        msg = medforge.parse(SIMPLE_ADT)
+        ack = msg.ack()
+        assert "MSH|" in ack
+        assert "MSA|" in ack
+        assert "AA" in ack
+        assert "12345" in ack  # original control ID in MSA
+
+    def test_ack_swaps_sender_receiver(self):
+        msg = medforge.parse(SIMPLE_ADT)
+        ack = msg.ack()
+        # Original: SENDER|FAC|RECV|FAC → ACK should be: RECV|FAC|SENDER|FAC
+        parts = ack.split("\r")[0].split("|")  # MSH segment fields
+        # MSH-3 in ACK = original MSH-5 (RECV)
+        assert parts[2] == "RECV"
+        # MSH-5 in ACK = original MSH-3 (SENDER)
+        assert parts[4] == "SENDER"
+
+    def test_ack_error_code(self):
+        msg = medforge.parse(SIMPLE_ADT)
+        ack = msg.ack(ack_code="AE", text="Something went wrong")
+        assert "AE" in ack
+        assert "Something went wrong" in ack
+
+    def test_ack_reject(self):
+        msg = medforge.parse(SIMPLE_ADT)
+        ack = msg.ack(ack_code="AR")
+        assert "AR" in ack
+
+    def test_ack_is_parseable(self):
+        """The generated ACK should itself be parseable."""
+        msg = medforge.parse(SIMPLE_ADT)
+        ack_str = msg.ack()
+        ack_msg = medforge.parse(ack_str)
+        assert ack_msg.segment("MSA") is not None
+

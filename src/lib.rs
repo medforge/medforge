@@ -1,11 +1,15 @@
 use pyo3::prelude::*;
 
+mod batch;
 mod escape;
 mod mllp;
 mod parser;
+mod timestamp;
 mod types;
 
-use types::{Component, Field, Message, Segment};
+use batch::parse_batch;
+use timestamp::{parse_date, parse_datetime};
+use types::{Component, Field, Message, MessageIterator, Segment, SegmentIterator};
 
 /// Parse a raw HL7v2 message string into a `Message` object.
 ///
@@ -28,10 +32,19 @@ fn parse(raw: &str) -> PyResult<Message> {
 /// medforge — High-performance HL7v2 message parser.
 #[pymodule]
 fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(parse, m)?)?;
+    // Core types
     m.add_class::<Message>()?;
     m.add_class::<Segment>()?;
     m.add_class::<Field>()?;
     m.add_class::<Component>()?;
+    m.add_class::<MessageIterator>()?;
+    m.add_class::<SegmentIterator>()?;
+
+    // Functions
+    m.add_function(wrap_pyfunction!(parse, m)?)?;
+    m.add_function(wrap_pyfunction!(parse_batch, m)?)?;
+    m.add_function(wrap_pyfunction!(parse_datetime, m)?)?;
+    m.add_function(wrap_pyfunction!(parse_date, m)?)?;
+
     Ok(())
 }
