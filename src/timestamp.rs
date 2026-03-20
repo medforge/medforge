@@ -108,14 +108,13 @@ fn split_timezone(raw: &str) -> (&str, Option<i32>) {
     if len >= 5 {
         let possible_tz_start = len - 5;
         let tz_part = &raw[possible_tz_start..];
-        if tz_part.starts_with('+') || tz_part.starts_with('-') {
-            if let (Ok(hours), Ok(mins)) =
+        if (tz_part.starts_with('+') || tz_part.starts_with('-'))
+            && let (Ok(hours), Ok(mins)) =
                 (tz_part[1..3].parse::<i32>(), tz_part[3..5].parse::<i32>())
-            {
-                let sign = if tz_part.starts_with('-') { -1 } else { 1 };
-                let offset_minutes = sign * (hours * 60 + mins);
-                return (&raw[..possible_tz_start], Some(offset_minutes));
-            }
+        {
+            let sign = if tz_part.starts_with('-') { -1 } else { 1 };
+            let offset_minutes = sign * (hours * 60 + mins);
+            return (&raw[..possible_tz_start], Some(offset_minutes));
         }
     }
 

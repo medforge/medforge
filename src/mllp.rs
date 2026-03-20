@@ -44,13 +44,13 @@ mod tests {
 
     #[test]
     fn test_detect_mllp() {
-        let framed = format!("\x0bMSH|...\x1c\r");
+        let framed = "\x0bMSH|...\x1c\r";
         assert!(is_mllp_framed(framed.as_bytes()));
     }
 
     #[test]
     fn test_detect_mllp_no_trailing_cr() {
-        let framed = format!("\x0bMSH|...\x1c");
+        let framed = "\x0bMSH|...\x1c";
         assert!(is_mllp_framed(framed.as_bytes()));
     }
 

@@ -298,7 +298,7 @@ mod tests {
 
     #[test]
     fn test_mllp_framed_message() {
-        let raw = format!("\x0bMSH|^~\\&|S|F|R|F|20230101||ADT^A01|1|P|2.5\rPID|1||MRN\x1c\r");
+        let raw = "\x0bMSH|^~\\&|S|F|R|F|20230101||ADT^A01|1|P|2.5\rPID|1||MRN\x1c\r";
         let msg = parse_message(&raw).unwrap();
         assert_eq!(msg.segments.len(), 2);
     }

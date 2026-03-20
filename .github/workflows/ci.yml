@@ -11,7 +11,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  # ── Lint (fmt + clippy via cargo check) ───────────────────────────────────
+  # ── Lint (fmt + clippy) ───────────────────────────────────────────────────
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -21,9 +21,6 @@ jobs:
           components: clippy, rustfmt
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings
-        env:
-          # Allow clippy to check without linking Python
-          PYO3_PRINT_CONFIG: "0"
 
   # ── Python tests (build extension + pytest) ────────────────────────────────
   python-tests:
@@ -42,8 +39,14 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          python -m venv .venv
+          . .venv/bin/activate
           pip install maturin pytest
       - name: Build and install
-        run: maturin develop
+        run: |
+          . .venv/bin/activate
+          maturin develop
       - name: Run tests
-        run: python -m pytest tests/ -v
+        run: |
+          . .venv/bin/activate
+          python -m pytest tests/ -v
